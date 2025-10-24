@@ -3,12 +3,15 @@ import 'package:flutter/material.dart';
 //import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'settings_controller.dart';
 import 'app_scaffold.dart';
 
 class AgregarCiudadesPage extends StatelessWidget {
  AgregarCiudadesPage({super.key});
   final TextEditingController _cityController = TextEditingController();
+  List ciudadData = [];
 
   @override
     Widget build(BuildContext context) {
@@ -40,12 +43,50 @@ class AgregarCiudadesPage extends StatelessWidget {
                   final ciudad = _cityController.text;
                   if (ciudad.isNotEmpty) {
                     // Lógica para buscar y agregar la ciudad
-                    final ciudadData = await _buscarCiudad(ciudad);
+                    ciudadData = await _buscarCiudad(ciudad);
+                    debugPrint(ciudadData.toString());
                     // imprimir en consola la ciudad agregada y sus coordenadas
-                    debugPrint('Ciudad agregada: ${ciudadData['nombre']}');
-                    debugPrint('Coordenadas: ${ciudadData['latitud']}, ${ciudadData['longitud']}');
+                   // debugPrint('Ciudad agregada: ${ciudadData['nombre']}');
+                    //debugPrint('Coordenadas: ${ciudadData['latitud']}, ${ciudadData['longitud']}');
                   }
                 },
+              ),
+              SizedBox(height: 20),
+              Container(
+                height:200,
+                child: ListView.builder(
+                  itemCount: ciudadData.length,
+                  itemBuilder: (context, index) {
+                    final ciudadInfo = ciudadData[index];
+                    return ListTile(
+                      title: Text(ciudadInfo['display_name']),
+                      subtitle: Text('Lat: ${ciudadInfo['lat']}, Lon: ${ciudadInfo['lon']}'),
+                    );
+                  },
+
+                ),
+              ),
+              SizedBox(height: 20),
+              Container(
+                height: 300,
+                // Agregar mapa con flutter_map con control de zoom.
+                child: FlutterMap(
+                  options: MapOptions(
+                    initialCenter: LatLng(29.0948207, -110.9692202),
+                    initialZoom: 8,
+                    maxZoom: 18,
+                    minZoom: 3,
+
+                  ),
+                  children: [
+                    TileLayer(
+                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      userAgentPackageName: 'com.example.weather_app',
+                      subdomains: ['a', 'b', 'c'],
+                    ),
+                  ],
+                ),
+
               ),
             ]
           ),
@@ -55,7 +96,7 @@ class AgregarCiudadesPage extends StatelessWidget {
       ),
     );
   }
-  Future<Map<String, dynamic>> _buscarCiudad(String nombreCiudad) async {
+  Future<List> _buscarCiudad(String nombreCiudad) async {
     // Aquí iría la lógica para buscar la ciudad en una base de datos o API
     // Por ahora, devolvemos un mapa simulado
     // Necesitamos armar el url para  consultar Nominatim con el nombreCiudad
@@ -66,21 +107,23 @@ class AgregarCiudadesPage extends StatelessWidget {
     if (response.statusCode == 200) {
       final List data = json.decode(response.body);
       if (data.isNotEmpty) {
-        final ciudadInfo = data[0];
-        return {
+        //final ciudadInfo = data[0];
+        return data; 
+        /*{
           'nombre': ciudadInfo['display_name'],
           'pais': ciudadInfo['address']['country'],
           'latitud': double.parse(ciudadInfo['lat']),
           'longitud': double.parse(ciudadInfo['lon']),
-        };
+        };*/
       }
     }
-    return {
+    return [];
+    /*{
       'nombre': nombreCiudad,
       'pais': 'País Ejemplo',
       'latitud': 0.0,
       'longitud': 0.0,
-    };
+    };*/
   }
   
 }
