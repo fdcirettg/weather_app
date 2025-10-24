@@ -40,8 +40,10 @@ class AgregarCiudadesPage extends StatelessWidget {
                   final ciudad = _cityController.text;
                   if (ciudad.isNotEmpty) {
                     // Lógica para buscar y agregar la ciudad
-                    final ciudadData = _buscarCiudad(ciudad);
-                    debugPrint('Ciudad agregada: $ciudadData');
+                    final ciudadData = await _buscarCiudad(ciudad);
+                    // imprimir en consola la ciudad agregada y sus coordenadas
+                    debugPrint('Ciudad agregada: ${ciudadData['nombre']}');
+                    debugPrint('Coordenadas: ${ciudadData['latitud']}, ${ciudadData['longitud']}');
                   }
                 },
               ),
@@ -80,16 +82,5 @@ class AgregarCiudadesPage extends StatelessWidget {
       'longitud': 0.0,
     };
   }
-  /*
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Agregar Ciudades'),
-      ),
-      body: const Center(
-        child: Text('Aquí puedes agregar nuevas ciudades'),
-      ),
-    );
-  }
-  */
+  
 }
