@@ -8,10 +8,21 @@ import 'package:latlong2/latlong.dart';
 import 'settings_controller.dart';
 import 'app_scaffold.dart';
 
-class AgregarCiudadesPage extends StatelessWidget {
- AgregarCiudadesPage({super.key});
+class AgregarCiudadesPage extends StatefulWidget {
+  const AgregarCiudadesPage({super.key});
+  @override
+  State<AgregarCiudadesPage> createState() => _AgregarCiudadesPageState();
+}
+
+class _AgregarCiudadesPageState extends State<AgregarCiudadesPage> {
   final TextEditingController _cityController = TextEditingController();
+  final MapController _mapController = MapController();
   List ciudadData = [];
+  double dLat = 29.0948207;
+  double dLon = -110.9692202;
+  double selectedLat = 29.0948207;
+  double selectedLon = -110.9692202;
+  int? selectedIndex;
 
   @override
     Widget build(BuildContext context) {
@@ -42,17 +53,17 @@ class AgregarCiudadesPage extends StatelessWidget {
                 onPressed: () async {
                   final ciudad = _cityController.text;
                   if (ciudad.isNotEmpty) {
-                    // Lógica para buscar y agregar la ciudad
-                    ciudadData = await _buscarCiudad(ciudad);
+                    final resultados = await _buscarCiudad(ciudad);
+                    if (!mounted) return;
+                    setState(() {
+                      ciudadData = resultados;
+                    });
                     debugPrint(ciudadData.toString());
-                    // imprimir en consola la ciudad agregada y sus coordenadas
-                   // debugPrint('Ciudad agregada: ${ciudadData['nombre']}');
-                    //debugPrint('Coordenadas: ${ciudadData['latitud']}, ${ciudadData['longitud']}');
                   }
                 },
               ),
               SizedBox(height: 20),
-              Container(
+              SizedBox(
                 height:200,
                 child: ListView.builder(
                   itemCount: ciudadData.length,
@@ -61,22 +72,32 @@ class AgregarCiudadesPage extends StatelessWidget {
                     return ListTile(
                       title: Text(ciudadInfo['display_name']),
                       subtitle: Text('Lat: ${ciudadInfo['lat']}, Lon: ${ciudadInfo['lon']}'),
+                      selected: selectedIndex == index,
+                      onTap:() {
+                        setState(() {
+                          selectedIndex = index;
+                          _cityController.text = ciudadInfo['display_name'];
+                          selectedLat = double.parse(ciudadInfo['lat']);
+                          selectedLon = double.parse(ciudadInfo['lon']);
+                          _mapController.move(LatLng(selectedLat, selectedLon), 10);
+                        });
+                      }
                     );
                   },
 
                 ),
               ),
               SizedBox(height: 20),
-              Container(
+              SizedBox(
                 height: 300,
                 // Agregar mapa con flutter_map con control de zoom.
                 child: FlutterMap(
+                  mapController: _mapController,
                   options: MapOptions(
-                    initialCenter: LatLng(29.0948207, -110.9692202),
-                    initialZoom: 8,
+                    initialCenter: LatLng(selectedLat, selectedLon),
+                    initialZoom: 10,
                     maxZoom: 18,
                     minZoom: 3,
-
                   ),
                   children: [
                     TileLayer(
