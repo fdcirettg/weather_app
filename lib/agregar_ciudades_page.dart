@@ -28,10 +28,12 @@ class _AgregarCiudadesPageState extends State<AgregarCiudadesPage> {
     Widget build(BuildContext context) {
     return AppScaffold(
       title: "Agregar Ciudades",
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: 
           Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 "Aquí puedes agregar nuevas ciudades",
@@ -111,9 +113,8 @@ class _AgregarCiudadesPageState extends State<AgregarCiudadesPage> {
               ),
             ]
           ),
-          Divider(color: Colors.grey.shade300),
-
-        ],
+          //Divider(color: Colors.grey.shade300),
+      ),
       ),
     );
   }
