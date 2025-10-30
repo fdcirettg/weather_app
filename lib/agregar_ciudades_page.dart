@@ -23,6 +23,7 @@ class _AgregarCiudadesPageState extends State<AgregarCiudadesPage> {
   double selectedLat = 29.0948207;
   double selectedLon = -110.9692202;
   int? selectedIndex;
+  Future<List<Map<String, dynamic>>> get ciudadesGuardadas => _ciudadesGuardadas();
 
   @override
     Widget build(BuildContext context) {
@@ -90,6 +91,48 @@ class _AgregarCiudadesPageState extends State<AgregarCiudadesPage> {
                 ),
               ),
               SizedBox(height: 20),
+              //aqui va la lista
+              SizedBox(
+                height: 200,
+                child: FutureBuilder<List<Map<String, dynamic>>>(
+                  future: ciudadesGuardadas,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      return Text('Error ${snapshot.error}');
+                    }
+                    final data = snapshot.data ?? const <Map<String, dynamic>> [];
+                    if (data.isEmpty) {
+                      return const Center(child: Text('No hay ciudades guardadas.'));
+                    }
+                    return ListView.builder(
+                      itemCount: data.length,
+                      itemBuilder: (context, index) {
+                        final ciudad = data[index];
+                        return ListTile(
+                          title: Text(ciudad['nombre'].toString()),
+                          subtitle: Text('Lat: ${ciudad["latitud"]} Lon: ${ciudad["longitud"]}'),
+
+                        );
+                      },
+                    );
+                  },
+                ), 
+                
+              ),
+              SizedBox(height: 20),
+              //aqui va el boton de agegar ciudades
+              SizedBox(
+                child: ElevatedButton(
+                  child: const Text("Agregar ciudad"), 
+                  onPressed: () {
+                    _agregarCiudad(_cityController.text, selectedLat, selectedLon);
+                  },
+                ),
+              ),
+              SizedBox(height: 20),
               SizedBox(
                 height: 300,
                 // Agregar mapa con flutter_map con control de zoom.
@@ -146,6 +189,28 @@ class _AgregarCiudadesPageState extends State<AgregarCiudadesPage> {
       'latitud': 0.0,
       'longitud': 0.0,
     };*/
+  }
+  void _agregarCiudad(String nombre, double lat, double lon) async {
+       final prefs = await SharedPreferences.getInstance();
+       List<String> ciudadesGuardadas = prefs.getStringList('ciudades') ?? [];
+       String ciudadString = json.encode({
+         'nombre': nombre,
+         'latitud': lat,
+         'longitud': lon,
+       });
+       ciudadesGuardadas.add(ciudadString);
+       await prefs.setStringList('ciudades', ciudadesGuardadas);
+       if (!mounted) return;
+       ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ciudad agregada: $nombre')),
+       );
+       // Forzamos la reconstrucción
+       setState(() {});
+  }
+  Future<List<Map<String, dynamic>>> _ciudadesGuardadas() async {
+    final prefs = await SharedPreferences.getInstance();
+    final ciudadesString = prefs.getStringList('ciudades') ?? [];
+    return ciudadesString.map((ciudadStr) => json.decode(ciudadStr) as Map<String, dynamic>).toList();
   }
   
 }
