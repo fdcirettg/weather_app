@@ -23,7 +23,13 @@ class _AgregarCiudadesPageState extends State<AgregarCiudadesPage> {
   double selectedLat = 29.0948207;
   double selectedLon = -110.9692202;
   int? selectedIndex;
-  Future<List<Map<String, dynamic>>> get ciudadesGuardadas => _ciudadesGuardadas();
+  Future<List<Map<String, dynamic>>> ciudadesGuardadas = Future<List<Map<String, dynamic>>>.value([]);
+
+  @override
+  void initState() {
+    super.initState();
+    ciudadesGuardadas = _ciudadesGuardadas();
+  }
 
   @override
     Widget build(BuildContext context) {
@@ -192,20 +198,22 @@ class _AgregarCiudadesPageState extends State<AgregarCiudadesPage> {
   }
   void _agregarCiudad(String nombre, double lat, double lon) async {
        final prefs = await SharedPreferences.getInstance();
-       List<String> ciudadesGuardadas = prefs.getStringList('ciudades') ?? [];
+       List<String> listaciudadesGuardadas = prefs.getStringList('ciudades') ?? [];
        String ciudadString = json.encode({
          'nombre': nombre,
          'latitud': lat,
          'longitud': lon,
        });
-       ciudadesGuardadas.add(ciudadString);
-       await prefs.setStringList('ciudades', ciudadesGuardadas);
+       listaciudadesGuardadas.add(ciudadString);
+       await prefs.setStringList('ciudades', listaciudadesGuardadas);
        if (!mounted) return;
        ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Ciudad agregada: $nombre')),
        );
        // Forzamos la reconstrucción
-       setState(() {});
+       setState(() {
+          ciudadesGuardadas = _ciudadesGuardadas();
+       });
   }
   Future<List<Map<String, dynamic>>> _ciudadesGuardadas() async {
     final prefs = await SharedPreferences.getInstance();
