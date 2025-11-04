@@ -5,8 +5,10 @@ import 'package:provider/provider.dart';
 import 'app_scaffold.dart';
 import 'theme_provider.dart';
 import 'agregar_ciudades_page.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+void main() async {
+  await dotenv.load(fileName: ".env");
   runApp(
     ChangeNotifierProvider(
       create: (_) => ThemeProvider(),
@@ -15,8 +17,13 @@ void main() {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -54,8 +61,33 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   
-
+// Cargamos url, user  y pass desde el archivo .env
+  static String get apiTokenUrl => dotenv.env['meteomatics_api_url'] ?? 'https://login.meteomatics.com/api/v1/token';
+  static String get username => dotenv.env['meteomatics_user'] ?? '';
+  static String get password => dotenv.env['meteomatics_pwd'] ?? '';
+  String apiToken = '';
 @override
+  void initState() {
+    super.initState();
+    debugPrint('API URL: $apiTokenUrl');
+    debugPrint('Username: $username');
+    // imprime la contraseña de forma segura sin mostrarla completa
+    debugPrint('Password: ${'*' * password.length}');
+    // aquí vamos a llamar a la función para obtener el token
+    // obtenerToken();
+    // acá vamos a cargar las ciudades guardadas
+    // ciudadesGuardadas = _ciudadesGuardadas();
+  }
+
+  void obtenToken() async {
+    // Lógica para obtener el token de la API usando apiTokenUrl, username y password
+    // y luego asignarlo a la variable apiToken
+    // Si ya tenemos el token, no hacemos nada
+    if (apiToken.isNotEmpty) return;
+    // Aquí iría la lógica real para obtener el token
+    }
+    
+  @override
   Widget build(BuildContext context) {
     return AppScaffold(
       title: widget.title,
