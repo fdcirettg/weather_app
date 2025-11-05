@@ -6,6 +6,8 @@ import 'app_scaffold.dart';
 import 'theme_provider.dart';
 import 'agregar_ciudades_page.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -74,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // imprime la contraseña de forma segura sin mostrarla completa
     debugPrint('Password: ${'*' * password.length}');
     // aquí vamos a llamar a la función para obtener el token
-    // obtenerToken();
+    obtenToken();
     // acá vamos a cargar las ciudades guardadas
     // ciudadesGuardadas = _ciudadesGuardadas();
   }
@@ -85,8 +87,22 @@ class _MyHomePageState extends State<MyHomePage> {
     // Si ya tenemos el token, no hacemos nada
     if (apiToken.isNotEmpty) return;
     // Aquí iría la lógica real para obtener el token
+    String url = apiTokenUrl;
+    final response = await http.get(Uri.parse(url), headers: {
+      'Authorization': 'Basic ${base64Encode(utf8.encode('$username:$password'))}',
+    });
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      setState(() {
+        apiToken = data['access_token'];
+      });
+      debugPrint('Token obtenido: $apiToken');
+    } else {
+      debugPrint('Error al obtener el token: ${response.statusCode}');
     }
-    
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
