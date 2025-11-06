@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'settings_controller.dart';
 import 'app_scaffold.dart';
 
 class AgregarCiudadesPage extends StatefulWidget {
@@ -29,6 +28,12 @@ class _AgregarCiudadesPageState extends State<AgregarCiudadesPage> {
   void initState() {
     super.initState();
     ciudadesGuardadas = _ciudadesGuardadas();
+  }
+
+  @override
+  void dispose() {
+    _cityController.dispose();
+    super.dispose();
   }
 
   @override
@@ -197,15 +202,28 @@ class _AgregarCiudadesPageState extends State<AgregarCiudadesPage> {
     };*/
   }
   void _agregarCiudad(String nombre, double lat, double lon) async {
+       debugPrint('=== Iniciando _agregarCiudad ===');
+       debugPrint('Nombre: $nombre, Lat: $lat, Lon: $lon');
+       
        final prefs = await SharedPreferences.getInstance();
        List<String> listaciudadesGuardadas = prefs.getStringList('ciudades') ?? [];
+       debugPrint('Ciudades antes de agregar: ${listaciudadesGuardadas.length}');
+       
        String ciudadString = json.encode({
          'nombre': nombre,
          'latitud': lat,
          'longitud': lon,
        });
+       debugPrint('Ciudad a agregar (JSON): $ciudadString');
+       
        listaciudadesGuardadas.add(ciudadString);
        await prefs.setStringList('ciudades', listaciudadesGuardadas);
+       debugPrint('Ciudades después de agregar: ${listaciudadesGuardadas.length}');
+       
+       // Verificamos que se guardó correctamente
+       final verificacion = prefs.getStringList('ciudades') ?? [];
+       debugPrint('Verificación - Total ciudades guardadas: ${verificacion.length}');
+       
        if (!mounted) return;
        ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Ciudad agregada: $nombre')),
@@ -214,11 +232,21 @@ class _AgregarCiudadesPageState extends State<AgregarCiudadesPage> {
        setState(() {
           ciudadesGuardadas = _ciudadesGuardadas();
        });
+       debugPrint('=== Fin _agregarCiudad ===');
   }
   Future<List<Map<String, dynamic>>> _ciudadesGuardadas() async {
+    debugPrint('=== Cargando ciudades guardadas ===');
     final prefs = await SharedPreferences.getInstance();
     final ciudadesString = prefs.getStringList('ciudades') ?? [];
-    return ciudadesString.map((ciudadStr) => json.decode(ciudadStr) as Map<String, dynamic>).toList();
+    debugPrint('Total ciudades en SharedPreferences: ${ciudadesString.length}');
+    
+    if (ciudadesString.isNotEmpty) {
+      debugPrint('Primera ciudad: ${ciudadesString.first}');
+    }
+    
+    final resultado = ciudadesString.map((ciudadStr) => json.decode(ciudadStr) as Map<String, dynamic>).toList();
+    debugPrint('=== Fin carga ciudades ===');
+    return resultado;
   }
   
 }
