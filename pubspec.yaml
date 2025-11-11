@@ -45,10 +45,14 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  intl: ^0.20.2
+  macos_ui: ^2.2.2
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: "^0.14.4"
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -101,35 +105,53 @@ flutter:
 
   assets:
     - .env
-    - assets/001.png
-    - assets/002.png
-    - assets/003.png
-    - assets/004.png
-    - assets/005.png
-    - assets/006.png
-    - assets/007.png
-    - assets/008.png
-    - assets/009.png
-    - assets/010.png
-    - assets/011.png
-    - assets/012.png
-    - assets/013.png
-    - assets/014.png
-    - assets/015.png
-    - assets/016.png
-    - assets/101.png
-    - assets/102.png
-    - assets/103.png
-    - assets/104.png
-    - assets/105.png
-    - assets/106.png
-    - assets/107.png
-    - assets/108.png
-    - assets/109.png
-    - assets/110.png
-    - assets/111.png
-    - assets/112.png
-    - assets/113.png
-    - assets/114.png
-    - assets/115.png
-    - assets/116.png    
+    # - assets/001.png
+    # - assets/002.png
+    # - assets/003.png
+    # - assets/004.png
+    # - assets/005.png
+    # - assets/006.png
+    # - assets/007.png
+    # - assets/008.png
+    # - assets/009.png
+    # - assets/010.png
+    # - assets/011.png
+    # - assets/012.png
+    # - assets/013.png
+    # - assets/014.png
+    # - assets/015.png
+    # - assets/016.png
+    # - assets/101.png
+    # - assets/102.png
+    # - assets/103.png
+    # - assets/104.png
+    # - assets/105.png
+    # - assets/106.png
+    # - assets/107.png
+    # - assets/108.png
+    # - assets/109.png
+    # - assets/110.png
+    # - assets/111.png
+    # - assets/112.png
+    # - assets/113.png
+    # - assets/114.png
+    # - assets/115.png
+    # - assets/116.png    
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  web:
+    generate: true
+    image_path: "assets/icon.png"
+    background_color: "#hexcode"
+    theme_color: "#hexcode"
+  windows:
+    generate: true
+    image_path: "assets/icon.png"
+    icon_size: 48 # min:48, max:256, default: 48
+  macos:
+    generate: true
+    image_path: "assets/icon.png"

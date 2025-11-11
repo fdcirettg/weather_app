@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:weather_icons/weather_icons.dart';
+import 'package:intl/intl.dart'; 
 
 class ClimaCarouselView extends StatefulWidget {
   final Future<List<Map<String, dynamic>>> ciudadesGuardadas;
   final Function(Map<String, dynamic>) actualizaClima;
-  consts ClimaCarouselView({
+  const ClimaCarouselView({
     Key? key,
     required this.ciudadesGuardadas,
     required this.actualizaClima,
@@ -162,7 +163,159 @@ class _ClimaCarouselViewState extends State<ClimaCarouselView> {
       },
     );
   }
-}
-Widget _buildCarousel(List<Map<String, dynamic>> ciudades) {
-  return Container(); // Implementación del carrusel aquí
+
+  Widget _buildCarousel(List<Map<String, dynamic>> ciudades) {
+    return Column(
+      children: [
+        Expanded(
+          child: PageView.builder(
+            itemCount: ciudades.length,
+            onPageChanged: (index) {
+              setState(() {
+                _currentIndex = index;
+              });
+              // Actualizar clima de la ciudad actual
+              widget.actualizaClima(ciudades[index]);
+            },
+            itemBuilder: (context, index) {
+              final ciudad = ciudades[index];
+              final temperatura = ciudad['temperatura']?.toStringAsFixed(1) ?? '--';
+              final viento = ciudad['velocidad_viento']?.toStringAsFixed(1) ?? '--';
+              final simbolo = ciudad['simbolo_clima'] ?? 0;
+              final nombre = ciudad['nombre'] ?? 'Ciudad desconocida';
+              final ultimaActualizacion = ciudad['ultima_actualizacion'] ?? '';
+              
+              return Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.blue.shade400, Colors.blue.shade700],
+                  ),
+                ),
+                child: SafeArea(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      // Nombre de la ciudad
+                      Text(
+                        nombre,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      
+                      // Ícono del clima
+                      Icon(
+                        _obtenerIconoClima(simbolo),
+                        size: 120,
+                        color: Colors.white,
+                      ),
+                      
+                      // Temperatura
+                      Text(
+                        '$temperatura°C',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 72,
+                          fontWeight: FontWeight.w300,
+                        ),
+                      ),
+                      
+                      // Descripción del clima
+                      Text(
+                        _obtenerDescripcionClima(simbolo),
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 24,
+                        ),
+                      ),
+                      
+                      // Información adicional
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 40),
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Column(
+                              children: [
+                                const Icon(Icons.air, color: Colors.white, size: 30),
+                                const SizedBox(height: 8),
+                                Text(
+                                  '$viento m/s',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const Text(
+                                  'Viento',
+                                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                                ),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                const Icon(Icons.access_time, color: Colors.white, size: 30),
+                                const SizedBox(height: 8),
+                                Text(
+                                  _formatearHora(ultimaActualizacion),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const Text(
+                                  'Actualizado',
+                                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        
+        // Indicadores de página (dots)
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              ciudades.length,
+              (index) => Container(
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                width: _currentIndex == index ? 12 : 8,
+                height: _currentIndex == index ? 12 : 8,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _currentIndex == index 
+                      ? Colors.white 
+                      : Colors.white.withOpacity(0.4),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+
 }
