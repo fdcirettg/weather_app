@@ -8,6 +8,7 @@ import 'agregar_ciudades_page.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'clima_carousel_view.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -69,6 +70,8 @@ class _MyHomePageState extends State<MyHomePage> {
   static String get password => dotenv.env['meteomatics_pwd'] ?? '';
   Map<String, dynamic> city = {};
   String apiToken = '';
+  int? selectedIndex;
+
 @override
   void initState() {
     super.initState();
@@ -79,7 +82,8 @@ class _MyHomePageState extends State<MyHomePage> {
     // aquí vamos a llamar a la función para obtener el token
     obtenToken();
     // acá vamos a cargar las ciudades guardadas y usar la primera para actualizar el clima
-    _cargarYActualizarPrimeraCiudad();
+    //_cargarYActualizarPrimeraCiudad();
+    ciudadesGuardadas = _ciudadesGuardadas();
   }
   
   Future<void> _cargarYActualizarPrimeraCiudad() async {
@@ -209,18 +213,9 @@ Future<List<Map<String, dynamic>>> _ciudadesGuardadas() async {
   Widget build(BuildContext context) {
     return AppScaffold(
       title: widget.title,
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Center(
-            child: Text(
-              "Weather App",
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ),
-          Divider(color: Colors.grey.shade300),
-
-        ],
+      body: ClimaCarouselView(
+        ciudadesGuardadas: ciudadesGuardadas,
+        actualizaClima: _actualizaClima,
       ),
     );
   }

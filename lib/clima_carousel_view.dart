@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:weather_icons/weather_icons.dart';
+import 'package:intl/intl.dart';
 
 class ClimaCarouselView extends StatefulWidget {
   final Future<List<Map<String, dynamic>>> ciudadesGuardadas;
   final Function(Map<String, dynamic>) actualizaClima;
-  consts ClimaCarouselView({
+  const ClimaCarouselView({
     Key? key,
     required this.ciudadesGuardadas,
     required this.actualizaClima,
@@ -162,7 +163,144 @@ class _ClimaCarouselViewState extends State<ClimaCarouselView> {
       },
     );
   }
-}
+
 Widget _buildCarousel(List<Map<String, dynamic>> ciudades) {
-  return Container(); // Implementación del carrusel aquí
+  return Stack(
+    children: [
+      // CarouselView aquí
+      CarouselView(
+        itemExtent: MediaQuery.of(context).size.width,
+        shrinkExtent: MediaQuery.of(context).size.width,
+        onTap: (index) {
+          widget.actualizaClima(ciudades[index]);
+        },
+        children: List.generate(
+          ciudades.length,
+          (index) {
+            final ciudad = ciudades[index];
+            return _buildCiudadCard(ciudad);
+          },
+        ),
+      ),
+      Positioned(
+        top:50,
+        right:20,
+        child: IconButton(
+          icon: Icon(Icons.refresh, color: Colors.white,),
+          onPressed: () {
+            if (_currentIndex < ciudades.length) {
+              widget.actualizaClima(ciudades[_currentIndex]);
+            }
+          },
+        ),
+      )
+    ]
+  ); // Implementación del carrusel aquí
+}
+Widget _buildCiudadCard(Map<String, dynamic> ciudad) {
+  final temperatura = ciudad['temperatura'] ?? 0.0;
+  final simoboloClima = ciudad['simbolo_clima'] ?? 0;
+  final velocidadViento = ciudad['velocidad_viento'] ?? 0.0;
+  final nombre = ciudad['nombre'] ?? 'Desconocido';
+  final ultimaActualizacion = ciudad['ultima_actualizacion'] ?? '';
+  return Container(
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Colors.blue.shade400, Colors.blue.shade700],
+      ),
+    ),
+    child: SafeArea(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Nombre de la ciudad
+            Text(
+              nombre,
+              style: TextStyle(color: Colors.white, fontSize: 24),
+            ),
+            const SizedBox(height: 10),
+            // Icono del clima
+            Icon(
+              _obtenerIconoClima(simoboloClima),
+              color: Colors.white,
+              size: 120,
+            ),
+            const SizedBox(height: 10),
+            // Temperatura
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '${temperatura.toStringAsFixed(1)}',
+                  style: TextStyle(color: Colors.white, fontSize: 80, fontWeight: FontWeight.w200),
+                ),
+                const Padding(
+                  padding: EdgeInsets.only(top: 8),
+                  child: Text(
+                    '°C',
+                    style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w300),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            // Descripción del clima
+            Text(
+              _obtenerDescripcionClima(simoboloClima),
+              style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w300),
+            ),
+            const SizedBox(height: 5),
+            // Información adicional (viento, última actualización)
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildInfoItem(
+                    Icons.air,
+                    '${velocidadViento.toStringAsFixed(1)} m/s','Viento',
+                  ),
+                  _buildInfoItem(
+                    Icons.access_time,
+                    _formatearHora(ultimaActualizacion),
+                    'Última actualización',
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            
+          ],
+        ),
+      ),
+    ),
+  );
+}
+Widget _buildInfoItem(IconData icon, String value, String label) {
+  return Column(
+    children: [
+      Icon(icon, color: Colors.white70, size: 28),
+      const SizedBox(height: 8),
+      Text(
+        value,
+        style: const TextStyle(
+          color: Colors.white, 
+          fontSize: 18,
+          fontWeight: FontWeight.w500,
+          ),
+
+      ),
+      Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white60, 
+          fontSize: 14),
+          
+      ),
+    ],
+  );
+}
 }
