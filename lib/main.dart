@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:macos_ui/macos_ui.dart';
+import 'package:weather_app/agradecimiento.dart';
 import 'package:weather_app/clima_carousel_view.dart';
 import 'theme_provider.dart';
 import 'agregar_ciudades_page.dart';
@@ -336,8 +337,12 @@ class _MainWindowState extends State<MainWindow> {
                   label: Text('Clima'),
                 ),
                 SidebarItem(
-                  leading: MacosIcon(CupertinoIcons.add_circled),
+                  leading: MacosIcon(CupertinoIcons.add),
                   label: Text('Agregar Ciudades'),
+                ),
+                SidebarItem(
+                  leading: MacosIcon(CupertinoIcons.info),
+                  label: Text('Agradecimientos'),
                 ),
               ],
             );
@@ -351,6 +356,7 @@ class _MainWindowState extends State<MainWindow> {
             _buildClimaPage(),
             // Página de Agregar Ciudades
             AgregarCiudadesPage(onCiudadAgregada: _refreshCiudades),
+            const AgradecimientosPage(),
           ],
         ),
       ),

@@ -8,11 +8,11 @@ import 'package:latlong2/latlong.dart';
 import 'package:macos_ui/macos_ui.dart';
 
 class AgregarCiudadesPage extends StatefulWidget {
-  final VoidCallback? onCiudadAgregada;  // AGREGAR ESTA LÍNEA
+  final VoidCallback? onCiudadAgregada;
   
   const AgregarCiudadesPage({
     super.key,
-    this.onCiudadAgregada,  // AGREGAR ESTA LÍNEA
+    this.onCiudadAgregada, 
   });
 
   @override
