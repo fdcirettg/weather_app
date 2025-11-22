@@ -33,13 +33,18 @@ class MyApp extends StatelessWidget {
     final themeProvider = Provider.of<ThemeProvider>(context);
     
     return MacosApp(
-      title: 'Weather App',
-      theme: MacosThemeData.light(),
-      darkTheme: MacosThemeData.dark(),
-      themeMode: themeProvider.themeMode,
-      home: const MainWindow(),
-      debugShowCheckedModeBanner: false,
-    );
+    title: 'Weather App',
+    theme: MacosThemeData.light().copyWith(
+      primaryColor: CupertinoColors.systemBlue,
+    ),
+    darkTheme: MacosThemeData.dark().copyWith(
+      primaryColor: CupertinoColors.systemBlue,
+      canvasColor: const Color(0xFF1E1E1E), 
+    ),
+    themeMode: themeProvider.themeMode,
+    home: const MainWindow(),
+    debugShowCheckedModeBanner: false,
+  );
   }
 }
 
@@ -148,7 +153,7 @@ class _MainWindowState extends State<MainWindow> {
     }
   }
 
-  Future<void> _actualizaClima(Map<String, dynamic> ciudad) async {
+  Future<void> _actualizaClima(Map<String, dynamic> ciudad, {bool forzarActualizacion = false}) async {
     String nombreCiudad = ciudad['nombre'] ?? 'Desconocida';
     debugPrint('🌤️ Actualizando clima para $nombreCiudad');
     
@@ -157,23 +162,28 @@ class _MainWindowState extends State<MainWindow> {
       return;
     }
     
-    bool actualizar = false;
+    bool actualizar = forzarActualizacion; // Si se fuerza, ya es true
     double latitud = ciudad['latitud'] ?? 0.0;
     double longitud = ciudad['longitud'] ?? 0.0;
     
-    String ultimaActualizacion = '';
-    if (ciudad['ultima_actualizacion'] == null) {
-      actualizar = true;
-    } else {
-      ultimaActualizacion = ciudad['ultima_actualizacion'];
-      DateTime ultimaActualizacionDT = DateTime.parse(ultimaActualizacion);
-      DateTime ahoraZ = DateTime.now().toUtc();
-      Duration diferencia = ahoraZ.difference(ultimaActualizacionDT);
-      if (diferencia.inMinutes >= 60) {
+    // Solo verificar el tiempo si NO se está forzando la actualización
+    if (!forzarActualizacion) {
+      String ultimaActualizacion = '';
+      if (ciudad['ultima_actualizacion'] == null) {
         actualizar = true;
       } else {
-        debugPrint('ℹ️ Clima aún vigente (actualizado hace ${diferencia.inMinutes} minutos)');
+        ultimaActualizacion = ciudad['ultima_actualizacion'];
+        DateTime ultimaActualizacionDT = DateTime.parse(ultimaActualizacion);
+        DateTime ahoraZ = DateTime.now().toUtc();
+        Duration diferencia = ahoraZ.difference(ultimaActualizacionDT);
+        if (diferencia.inMinutes >= 60) {
+          actualizar = true;
+        } else {
+          debugPrint('ℹ️ Clima aún vigente (actualizado hace ${diferencia.inMinutes} minutos)');
+        }
       }
+    } else {
+      debugPrint('🔄 Forzando actualización manual del clima');
     }
     
     if (!actualizar) {
@@ -194,7 +204,7 @@ class _MainWindowState extends State<MainWindow> {
         final t2m = data[0]['coordinates'][0]['dates'][0]['value'];
         final windSpeed = data[1]['coordinates'][0]['dates'][0]['value'];
         final weatherSymbol = data[2]['coordinates'][0]['dates'][0]['value'];
-        ultimaActualizacion = data[0]['coordinates'][0]['dates'][0]['date'];
+        String ultimaActualizacion = data[0]['coordinates'][0]['dates'][0]['date'];
         
         debugPrint('🌥️ Temperatura: $t2m°C, Viento: $windSpeed m/s, Símbolo: $weatherSymbol');
         
@@ -234,7 +244,6 @@ class _MainWindowState extends State<MainWindow> {
     }
   }
 
-  // Método para refrescar ciudades cuando se agregan nuevas
   Future<void> _refreshCiudades() async {
     debugPrint('=== 🔄 Refrescando ciudades ===');
     final ciudadesActualizadas = await _ciudadesGuardadas();
@@ -375,7 +384,8 @@ class _MainWindowState extends State<MainWindow> {
             onPressed: () async {
               final ciudades = await ciudadesGuardadas;
               if (ciudades.isNotEmpty) {
-                await _actualizaClima(ciudades[_pageIndex == 0 ? 0 : 0]);
+                // Pasar forzarActualizacion: true para actualizar inmediatamente
+                await _actualizaClima(ciudades[0], forzarActualizacion: true);
               }
             },
             showLabel: false,
@@ -526,7 +536,7 @@ class _MainWindowState extends State<MainWindow> {
                 onSelected: () async {
                   final ciudades = await ciudadesGuardadas;
                   if (ciudades.isNotEmpty) {
-                    await _actualizaClima(ciudades[0]);
+                    await _actualizaClima(ciudades[0], forzarActualizacion: true);
                   }
                 },
               ),

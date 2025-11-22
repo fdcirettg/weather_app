@@ -7,6 +7,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:macos_ui/macos_ui.dart';
 
+
 class AgregarCiudadesPage extends StatefulWidget {
   final VoidCallback? onCiudadAgregada;
   
@@ -15,9 +16,11 @@ class AgregarCiudadesPage extends StatefulWidget {
     this.onCiudadAgregada, 
   });
 
+
   @override
   State<AgregarCiudadesPage> createState() => _AgregarCiudadesPageState();
 }
+
 
 class _AgregarCiudadesPageState extends State<AgregarCiudadesPage> {
   final TextEditingController _cityController = TextEditingController();
@@ -31,17 +34,20 @@ class _AgregarCiudadesPageState extends State<AgregarCiudadesPage> {
   Future<List<Map<String, dynamic>>> ciudadesGuardadas = 
       Future<List<Map<String, dynamic>>>.value([]);
 
+
   @override
   void initState() {
     super.initState();
     ciudadesGuardadas = _ciudadesGuardadas();
   }
 
+
   @override
   void dispose() {
     _cityController.dispose();
     super.dispose();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -239,9 +245,35 @@ class _AgregarCiudadesPageState extends State<AgregarCiudadesPage> {
                               leading: const MacosIcon(
                                 CupertinoIcons.location_fill,
                               ),
-                              title: Text(ciudad['nombre'].toString()),
-                              subtitle: Text(
-                                'Lat: ${ciudad["latitud"]} Lon: ${ciudad["longitud"]}',
+                              title: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(ciudad['nombre'].toString()),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'Lat: ${ciudad["latitud"]} Lon: ${ciudad["longitud"]}',
+                                          style: MacosTheme.of(context).typography.caption1,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  MacosIconButton(
+                                    icon: const MacosIcon(
+                                      CupertinoIcons.delete,
+                                      color: MacosColors.systemRedColor,
+                                      size: 20,
+                                    ),
+                                    onPressed: () {
+                                      _eliminarCiudad(
+                                        index, 
+                                        ciudad['nombre'].toString(),
+                                      );
+                                    },
+                                  ),
+                                ],
                               ),
                               onClick: () {
                                 _mapController.move(
@@ -396,11 +428,56 @@ class _AgregarCiudadesPageState extends State<AgregarCiudadesPage> {
       ciudadData = [];
     });
     
-    // LLAMAR AL CALLBACK AQUÍ
     widget.onCiudadAgregada?.call();
     
     debugPrint('=== Fin _agregarCiudad ===');
   }
+
+
+  void _eliminarCiudad(int index, String nombreCiudad) async {
+    debugPrint('=== Iniciando _eliminarCiudad ===');
+    debugPrint('Índice a eliminar: $index, Ciudad: $nombreCiudad');
+    
+    final prefs = await SharedPreferences.getInstance();
+    List<String> listaciudadesGuardadas = 
+        prefs.getStringList('ciudades') ?? [];
+    debugPrint('Ciudades antes de eliminar: ${listaciudadesGuardadas.length}');
+    
+    if (index >= 0 && index < listaciudadesGuardadas.length) {
+      listaciudadesGuardadas.removeAt(index);
+      await prefs.setStringList('ciudades', listaciudadesGuardadas);
+      debugPrint('Ciudades después de eliminar: ${listaciudadesGuardadas.length}');
+      
+      if (!mounted) return;
+      
+      showMacosAlertDialog(
+        context: context,
+        builder: (_) => MacosAlertDialog(
+          appIcon: const Icon(
+            CupertinoIcons.trash, 
+            size: 64,
+            color: MacosColors.systemRedColor,
+          ),
+          title: const Text('Ciudad eliminada'),
+          message: Text('$nombreCiudad ha sido eliminada exitosamente'),
+          primaryButton: PushButton(
+            controlSize: ControlSize.large,
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ),
+      );
+      
+      setState(() {
+        ciudadesGuardadas = _ciudadesGuardadas();
+      });
+      
+      widget.onCiudadAgregada?.call();
+    }
+    
+    debugPrint('=== Fin _eliminarCiudad ===');
+  }
+
 
   Future<List<Map<String, dynamic>>> _ciudadesGuardadas() async {
     debugPrint('=== Cargando ciudades guardadas ===');

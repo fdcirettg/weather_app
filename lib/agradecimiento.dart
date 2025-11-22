@@ -68,6 +68,11 @@ class _AgradecimientosPageState extends State<AgradecimientosPage> {
                         titulo: 'Luis Alberto Morales Medina',
                         subtitulo: 'Me llaman Chino',
                       ),
+                      _buildItemLista(
+                        icono: CupertinoIcons.person,
+                        titulo: 'Lopez Felix Julio Cesar',
+                        subtitulo: 'Viva Obregon 😎',
+                      ),
                     ],
                   ),
                   

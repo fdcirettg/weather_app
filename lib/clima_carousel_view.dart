@@ -14,9 +14,8 @@ class ClimaCarouselView extends StatefulWidget {
   State<ClimaCarouselView> createState() => _ClimaCarouselViewState();
 }
 class _ClimaCarouselViewState extends State<ClimaCarouselView> {
-  int _currentIndex = 0; // Índice de la página actual en el PageView
+  int _currentIndex = 0; 
 
-  // Mapa de íconos del clima
   IconData _obtenerIconoClima(int simbolo) {
     switch (simbolo) {
       case 0:
@@ -80,7 +79,6 @@ class _ClimaCarouselViewState extends State<ClimaCarouselView> {
     return FutureBuilder<List<Map<String, dynamic>>>(
       future: widget.ciudadesGuardadas,
       builder: (context, snapshot) {
-        // Mostrar 'Loading' mientras se cargan los datos
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Container(
             decoration: BoxDecoration(
@@ -95,7 +93,6 @@ class _ClimaCarouselViewState extends State<ClimaCarouselView> {
             ),
           );
         }
-        // Manejar errores
         if (snapshot.hasError) {
           return Container(
             decoration: BoxDecoration(
@@ -128,7 +125,6 @@ class _ClimaCarouselViewState extends State<ClimaCarouselView> {
             ),
           );
         }
-        // Acceder a la lista de ciudades
         final ciudades = snapshot.data ?? [];
         if (ciudades.isEmpty) {
           return Container(
@@ -158,7 +154,6 @@ class _ClimaCarouselViewState extends State<ClimaCarouselView> {
             ),
           );
         }
-        // Mostrar el Carousel de ciudades
         return _buildCarousel(ciudades);
       },
     );
@@ -174,7 +169,6 @@ class _ClimaCarouselViewState extends State<ClimaCarouselView> {
               setState(() {
                 _currentIndex = index;
               });
-              // Actualizar clima de la ciudad actual
               widget.actualizaClima(ciudades[index]);
             },
             itemBuilder: (context, index) {
@@ -197,7 +191,6 @@ class _ClimaCarouselViewState extends State<ClimaCarouselView> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      // Nombre de la ciudad
                       Text(
                         nombre,
                         style: const TextStyle(
@@ -208,14 +201,12 @@ class _ClimaCarouselViewState extends State<ClimaCarouselView> {
                         textAlign: TextAlign.center,
                       ),
                       
-                      // Ícono del clima
                       Icon(
                         _obtenerIconoClima(simbolo),
                         size: 120,
                         color: Colors.white,
                       ),
                       
-                      // Temperatura
                       Text(
                         '$temperatura°C',
                         style: const TextStyle(
@@ -225,7 +216,6 @@ class _ClimaCarouselViewState extends State<ClimaCarouselView> {
                         ),
                       ),
                       
-                      // Descripción del clima
                       Text(
                         _obtenerDescripcionClima(simbolo),
                         style: const TextStyle(
@@ -234,7 +224,6 @@ class _ClimaCarouselViewState extends State<ClimaCarouselView> {
                         ),
                       ),
                       
-                      // Información adicional
                       Container(
                         margin: const EdgeInsets.symmetric(horizontal: 40),
                         padding: const EdgeInsets.all(20),
@@ -292,7 +281,6 @@ class _ClimaCarouselViewState extends State<ClimaCarouselView> {
           ),
         ),
         
-        // Indicadores de página (dots)
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
